@@ -25,6 +25,7 @@ export class CodeEditor {
     this.scratch = DEFAULT_SNIPPET;
     this.editor = null;
     this.monaco = null;
+    this.models = {};
     this.flashDecorations = [];
     this.hoverDecorations = [];
     
@@ -52,17 +53,21 @@ export class CodeEditor {
       
       if (this.editor) {
         const file = s.files.find(f => f.id === s.activeFileId);
+        const fileName = file ? file.name : "scratch.c";
         const val = s.activeFileId ? s.activeContent : this.scratch;
-        const lang = getLanguageFromName(file ? file.name : "scratch.c");
+        const lang = getLanguageFromName(fileName);
+        const modelId = s.activeFileId || "scratch";
         
-        // Prevent cursor jumping if just editing
-        if (this.editor.getValue() !== val) {
-          this.editor.setValue(val);
+        let model = this.models[modelId];
+        if (!model && this.monaco) {
+          model = this.monaco.editor.createModel(val, lang, this.monaco.Uri.parse(`file:///${modelId}/${fileName}`));
+          this.models[modelId] = model;
         }
-        
-        if (s.activeFileId !== prevActiveFileId) {
-          const model = this.editor.getModel();
-          if (this.monaco) this.monaco.editor.setModelLanguage(model, lang);
+
+        if (this.editor.getModel() !== model) {
+          this.editor.setModel(model);
+        } else if (model && model.getValue() !== val) {
+          this.editor.setValue(val);
         }
       }
       this.syncMarkers();
@@ -155,9 +160,17 @@ export class CodeEditor {
         this.monaco = window.monaco;
         defineCompilerHubTheme(this.monaco);
         
+        const initialFile = this.fsState.files.find(f => f.id === this.fsState.activeFileId);
+        const initialFileName = initialFile ? initialFile.name : "scratch.c";
+        const initialLang = getLanguageFromName(initialFileName);
+        const initialModelId = this.fsState.activeFileId || "scratch";
+        const initialVal = this.fsState.activeFileId ? this.fsState.activeContent : this.scratch;
+
+        const initialModel = this.monaco.editor.createModel(initialVal, initialLang, this.monaco.Uri.parse(`file:///${initialModelId}/${initialFileName}`));
+        this.models[initialModelId] = initialModel;
+
         this.editor = this.monaco.editor.create(this.container.querySelector("#monaco-container"), {
-          value: this.fsState.activeFileId ? this.fsState.activeContent : this.scratch,
-          language: getLanguageFromName("scratch.c"),
+          model: initialModel,
           theme: COMPILERHUB_THEME,
           fontSize: this.uiState.fontSize,
           fontFamily: "JetBrains Mono, ui-monospace, monospace",
@@ -280,7 +293,7 @@ export class CodeEditor {
     tablist.addEventListener("scroll", updateFades);
     window.addEventListener("resize", updateFades);
     tablist.addEventListener("wheel", (e) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      if (e.deltaX === 0 && e.deltaY !== 0) {
         tablist.scrollLeft += e.deltaY;
         e.preventDefault();
         updateFades();

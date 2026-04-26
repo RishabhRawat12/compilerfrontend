@@ -103,6 +103,11 @@ export class FileExplorer {
     
     // Explicitly scope lucide insertion for performance
     if (window.lucide) lucide.createIcons({ root: treeContainer });
+
+    if (this.renamingNodeId) {
+      const input = treeContainer.querySelector(`#rename-${this.renamingNodeId}`);
+      if (input) input.focus();
+    }
   }
 
   createNodeEl(node, depth) {
@@ -168,28 +173,25 @@ export class FileExplorer {
 
     // Rename logic handling
     if (isRenaming) {
-      setTimeout(() => {
-        const input = row.querySelector(`#rename-${node.id}`);
-        if (input) {
-          input.focus();
-          const commitRename = async () => {
-            const val = input.value.trim();
-            if (val && val !== node.name) {
-              await fsStore.rename(node.type, node.id, val);
-            }
+      const input = row.querySelector(`#rename-${node.id}`);
+      if (input) {
+        const commitRename = async () => {
+          const val = input.value.trim();
+          if (val && val !== node.name) {
+            await fsStore.rename(node.type, node.id, val);
+          }
+          this.renamingNodeId = null;
+          this.renderTree();
+        };
+        input.addEventListener("blur", commitRename);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") commitRename();
+          if (e.key === "Escape") {
             this.renamingNodeId = null;
             this.renderTree();
-          };
-          input.addEventListener("blur", commitRename);
-          input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") commitRename();
-            if (e.key === "Escape") {
-              this.renamingNodeId = null;
-              this.renderTree();
-            }
-          });
-        }
-      }, 0);
+          }
+        });
+      }
     }
 
     li.appendChild(row);
@@ -253,6 +255,10 @@ export class FileExplorer {
   }
 
   showContextMenu(e, node) {
+    if (this._closeContextMenu) {
+      this._closeContextMenu();
+    }
+
     const ctx = this.container.querySelector("#explorer-context-menu");
     ctx.style.left = `${e.clientX}px`;
     ctx.style.top = `${e.clientY}px`;
@@ -274,7 +280,9 @@ export class FileExplorer {
     const unbind = () => {
       ctx.classList.add("hidden");
       document.removeEventListener("click", onClickOutside);
+      this._closeContextMenu = null;
     };
+    this._closeContextMenu = unbind;
 
     const onClickOutside = (ev) => {
       if (!ctx.contains(ev.target)) unbind();

@@ -1,8 +1,15 @@
+import { compilerStore } from "../store/compilerStore.js";
+
 export class StatusBar {
   constructor(container) {
     this.container = container;
+    this.unsubscribeComp = null;
     this.render();
     this.bindEvents();
+
+    this.unsubscribeComp = compilerStore.subscribe(s => {
+      this.updateDiagnostics(compilerStore.totalErrors(), compilerStore.totalWarnings());
+    });
   }
 
   render() {
@@ -48,6 +55,7 @@ export class StatusBar {
   }
 
   destroy() {
+    if (this.unsubscribeComp) this.unsubscribeComp();
     window.removeEventListener("compilerhub:cursor", this.onCursorMove);
     this.container.innerHTML = "";
   }
