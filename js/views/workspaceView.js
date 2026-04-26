@@ -79,7 +79,7 @@ export class WorkspaceView {
       this.container.querySelector("#v-resizer"),
       this.container.querySelector("#editor-panel"),
       this.container.querySelector("#compilation-panel"),
-      "vertical"
+      () => uiStore.getState().layoutDir
     );
 
     // Initialize stores to globals to make them accessible to command palette etc.
@@ -105,6 +105,31 @@ export class WorkspaceView {
         explorerPanel.style.flexBasis = "250px";
         hResizer.style.pointerEvents = "auto";
         hResizer.style.opacity = "1";
+      }
+
+      // Toggle layout direction
+      const mainContent = this.container.querySelector("#main-content-area");
+      const vResizer = this.container.querySelector("#v-resizer");
+      const compPanel = this.container.querySelector("#compilation-panel");
+      
+      if (state.layoutDir === "horizontal") {
+        mainContent.classList.remove("flex-col");
+        mainContent.classList.add("flex-row");
+        
+        vResizer.classList.remove("h-1_5", "cursor-row-resize", "my-0.5");
+        vResizer.classList.add("w-1_5", "cursor-col-resize", "mx-0.5");
+        
+        compPanel.classList.remove("pt-1");
+        compPanel.classList.add("pl-1");
+      } else {
+        mainContent.classList.remove("flex-row");
+        mainContent.classList.add("flex-col");
+        
+        vResizer.classList.remove("w-1_5", "cursor-col-resize", "mx-0.5");
+        vResizer.classList.add("h-1_5", "cursor-row-resize", "my-0.5");
+        
+        compPanel.classList.remove("pl-1");
+        compPanel.classList.add("pt-1");
       }
     });
   }

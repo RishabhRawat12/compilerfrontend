@@ -12,49 +12,49 @@ export class Header {
 
   render() {
     this.container.innerHTML = `
-      <header class="h-12 border-b border-border bg-surface-1 flex items-center justify-between px-4 shrink-0 transition-colors">
-        <div class="flex items-center gap-3">
-          <button id="header-menu-btn" class="size-8 flex items-center justify-center rounded-md hover:bg-surface-2 text-muted-foreground hover:text-foreground transition-colors" aria-label="Toggle explorer">
-            <i data-lucide="menu" class="size-4"></i>
+      <header class="h-9 flex items-center justify-between gap-3 px-2 border-b border-border bg-surface-1 shrink-0 transition-colors">
+        <div class="flex items-center gap-1">
+          <button id="header-menu-btn" class="h-6 w-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-surface-2 transition-colors" aria-label="Toggle explorer">
+            <i data-lucide="panel-left" class="size-3.5"></i>
+          </button>
+          <button id="header-layout-btn" class="h-6 w-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-surface-2 transition-colors" aria-label="Toggle layout">
+            <i data-lucide="rows-2" id="layout-icon" class="size-3.5"></i>
           </button>
           
-          <div class="flex items-center gap-2 px-2 border-l border-border/50 ml-1">
-            <span class="size-6 rounded bg-gradient-primary flex items-center justify-center shadow-elegant">
-              <i data-lucide="zap" class="size-3 text-primary-foreground"></i>
-            </span>
-            <span class="font-semibold text-sm tracking-tight text-foreground">CompilerHub</span>
-          </div>
+          <span class="size-5 rounded flex items-center justify-center bg-gradient-to-br from-primary to-primary-glow ml-1">
+            <i data-lucide="zap" class="size-3 text-primary-foreground"></i>
+          </span>
+          <h1 class="text-xs font-semibold tracking-tight ml-1 text-foreground">CompilerHub</h1>
         </div>
 
-        <!-- Command Palette Trigger Hint -->
-        <button id="header-search-btn" class="hidden md:flex items-center gap-2 px-3 h-8 rounded-md bg-surface-2 border border-border/50 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-all flex-1 max-w-sm mx-4">
-          <i data-lucide="search" class="size-3.5"></i>
-          <span class="flex-1 text-left">Search files...</span>
-          <kbd class="hidden lg:inline-flex h-5 items-center gap-1 rounded border border-border bg-surface-3 px-1.5 font-mono text-[10px] font-medium text-subtle-foreground opacity-100">
-            <span class="text-xs">⌘</span>K
-          </kbd>
+        <button id="header-search-btn" class="hidden sm:flex items-center gap-2 h-6 px-2 max-w-md w-72 rounded-md bg-background/60 border border-border text-[11px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors mx-4">
+          <i data-lucide="search" class="size-3"></i>
+          <span class="flex-1 text-left">Search files, run commands…</span>
+          <kbd class="font-mono text-[10px] px-1 rounded bg-secondary/60 border border-border">Ctrl K</kbd>
         </button>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1">
           <div class="relative">
-            <button id="header-settings-btn" class="size-8 flex items-center justify-center rounded-md hover:bg-surface-2 text-muted-foreground hover:text-foreground transition-colors">
-              <i data-lucide="settings-2" class="size-4"></i>
+            <button id="header-user-btn" class="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1 rounded hover:bg-surface-2 transition-colors">
+              <span id="header-username">Account</span>
+              <i data-lucide="chevron-down" class="size-3 ml-0.5"></i>
             </button>
-            <div id="settings-dropdown" class="hidden absolute right-0 top-full mt-1 w-48 rounded-md border border-border bg-popover text-popover-foreground shadow-md z-50 py-1">
-              <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Appearance</div>
-              <div class="px-2 py-1 flex items-center justify-between text-sm">
-                <span>Font Size</span>
+            <div id="user-dropdown" class="hidden absolute right-0 top-full mt-1 w-48 rounded-md border border-border bg-popover text-popover-foreground shadow-md z-50 py-1">
+              <div class="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Appearance</div>
+              <div class="px-3 py-1.5 flex items-center justify-between text-xs">
+                <span class="flex items-center"><i data-lucide="settings" class="size-3.5 mr-2"></i> Font Size</span>
                 <div class="flex items-center gap-2 bg-surface-2 rounded px-1">
                   <button id="font-dec" class="hover:text-primary"><i data-lucide="minus" class="size-3"></i></button>
                   <span id="font-val" class="font-mono text-xs w-4 text-center">14</span>
                   <button id="font-inc" class="hover:text-primary"><i data-lucide="plus" class="size-3"></i></button>
                 </div>
               </div>
+              <div class="h-px bg-border my-1"></div>
+              <button id="logout-btn" class="w-full text-left flex items-center px-3 py-1.5 text-xs text-destructive hover:bg-destructive/15 transition-colors">
+                <i data-lucide="log-out" class="size-3.5 mr-2"></i> Log out
+              </button>
             </div>
           </div>
-          <button id="header-logout-btn" class="size-8 flex items-center justify-center rounded-md hover:bg-destructive/15 text-muted-foreground hover:text-destructive transition-colors" title="Log out">
-            <i data-lucide="log-out" class="size-4"></i>
-          </button>
         </div>
       </header>
     `;
@@ -66,32 +66,43 @@ export class Header {
 
   bindEvents() {
     const menuBtn = this.container.querySelector("#header-menu-btn");
+    const layoutBtn = this.container.querySelector("#header-layout-btn");
     const searchBtn = this.container.querySelector("#header-search-btn");
-    const settingsBtn = this.container.querySelector("#header-settings-btn");
-    const settingsDropdown = this.container.querySelector("#settings-dropdown");
-    const logoutBtn = this.container.querySelector("#header-logout-btn");
+    const userBtn = this.container.querySelector("#header-user-btn");
+    const userDropdown = this.container.querySelector("#user-dropdown");
+    const logoutBtn = this.container.querySelector("#logout-btn");
     
     const fontInc = this.container.querySelector("#font-inc");
     const fontDec = this.container.querySelector("#font-dec");
     const fontVal = this.container.querySelector("#font-val");
+    const usernameSpan = this.container.querySelector("#header-username");
+    const layoutIcon = this.container.querySelector("#layout-icon");
+
+    if (authStore.getState().user?.username) {
+      usernameSpan.textContent = authStore.getState().user.username;
+    }
 
     menuBtn.addEventListener("click", () => {
       uiStore.toggleExplorer();
+    });
+
+    layoutBtn.addEventListener("click", () => {
+      uiStore.toggleLayoutDir();
     });
 
     searchBtn.addEventListener("click", () => {
       uiStore.setCommandPaletteOpen(true);
     });
 
-    settingsBtn.addEventListener("click", (e) => {
+    userBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      settingsDropdown.classList.toggle("hidden");
+      userDropdown.classList.toggle("hidden");
     });
 
     // Close settings clicking outside
     document.addEventListener("click", (e) => {
-      if (!settingsDropdown.classList.contains("hidden") && !settingsDropdown.contains(e.target)) {
-        settingsDropdown.classList.add("hidden");
+      if (!userDropdown.classList.contains("hidden") && !userDropdown.contains(e.target)) {
+        userDropdown.classList.add("hidden");
       }
     });
 
@@ -104,6 +115,14 @@ export class Header {
 
     this.unsubscribeUi = uiStore.subscribe(state => {
       fontVal.innerText = state.fontSize;
+      
+      const newIconName = state.layoutDir === "horizontal" ? "rows-2" : "columns-2";
+      if (layoutIcon.getAttribute("data-lucide") !== newIconName) {
+        layoutIcon.setAttribute("data-lucide", newIconName);
+        if (window.lucide) {
+          lucide.createIcons({ root: layoutBtn });
+        }
+      }
     });
   }
 

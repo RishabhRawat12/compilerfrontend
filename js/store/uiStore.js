@@ -30,6 +30,10 @@ class UiStore extends Store {
     this.setState({ layoutDir: dir });
   }
 
+  toggleLayoutDir() {
+    this.setState((s) => ({ layoutDir: s.layoutDir === "horizontal" ? "vertical" : "horizontal" }));
+  }
+
   setCommandPaletteOpen(open) {
     this.setState({ commandPaletteOpen: open });
   }
