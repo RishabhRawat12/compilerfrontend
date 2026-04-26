@@ -22,12 +22,20 @@ class UiStore extends Store {
     this.setState({ explorerCollapsed: collapsed });
   }
 
+  toggleExplorer() {
+    this.setState((s) => ({ explorerCollapsed: !s.explorerCollapsed }));
+  }
+
   setLayoutDir(dir) {
     this.setState({ layoutDir: dir });
   }
 
   setCommandPaletteOpen(open) {
     this.setState({ commandPaletteOpen: open });
+  }
+
+  togglePalette() {
+    this.setState((s) => ({ commandPaletteOpen: !s.commandPaletteOpen }));
   }
 }
 

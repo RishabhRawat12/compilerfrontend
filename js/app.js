@@ -74,13 +74,11 @@ class App {
             break;
           case 'k':
             e.preventDefault();
-            const { commandPaletteOpen } = uiStore.getState();
-            uiStore.setCommandPaletteOpen(!commandPaletteOpen);
+            uiStore.togglePalette();
             break;
           case 'b':
             e.preventDefault();
-            const { explorerCollapsed } = uiStore.getState();
-            uiStore.setExplorerCollapsed(!explorerCollapsed);
+            uiStore.toggleExplorer();
             break;
         }
       }

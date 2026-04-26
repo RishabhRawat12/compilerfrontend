@@ -97,11 +97,14 @@ export class WorkspaceView {
     this.unsubscribeUi = uiStore.subscribe(state => {
       // Toggle explorer
       if (state.explorerCollapsed) {
-        explorerPanel.style.display = "none";
-        hResizer.style.display = "none";
+        explorerPanel.style.flexBasis = "0px";
+        explorerPanel.style.overflow = "hidden";
+        hResizer.style.pointerEvents = "none";
+        hResizer.style.opacity = "0.2";
       } else {
-        explorerPanel.style.display = "block";
-        hResizer.style.display = "block";
+        explorerPanel.style.flexBasis = "250px";
+        hResizer.style.pointerEvents = "auto";
+        hResizer.style.opacity = "1";
       }
     });
   }

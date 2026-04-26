@@ -76,8 +76,7 @@ export class Header {
     const fontVal = this.container.querySelector("#font-val");
 
     menuBtn.addEventListener("click", () => {
-      const state = uiStore.getState();
-      uiStore.setExplorerCollapsed(!state.explorerCollapsed);
+      uiStore.toggleExplorer();
     });
 
     searchBtn.addEventListener("click", () => {
