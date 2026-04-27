@@ -24,13 +24,14 @@ export function cn(...classes) {
  * Re-initialize Lucide icons in a given container
  */
 export function renderIcons(root = document) {
-  if (window.lucide && window.lucide.createIcons && window.lucide.icons) {
+  if (window.lucide && window.lucide.createIcons) {
     window.lucide.createIcons({
-      icons: window.lucide.icons,
+      icons: window.lucide,
       root: root
     });
   }
 }
+
 
 
 
