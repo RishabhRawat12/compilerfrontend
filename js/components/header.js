@@ -79,7 +79,9 @@ export class Header extends Component {
   afterRender() {
     super.afterRender();
     this.bindEvents();
+    renderIcons(this.container);
   }
+
 
   bindEvents() {
     const userBtn = this.container.querySelector("#header-user-btn");

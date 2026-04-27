@@ -45,7 +45,9 @@ export class CodeEditor extends Component {
     super.afterRender();
     this.update();
     this.bindEvents();
+    renderIcons(this.container);
   }
+
 
   update() {
     this.updateTabs();
