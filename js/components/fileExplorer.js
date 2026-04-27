@@ -67,7 +67,9 @@ export class FileExplorer extends Component {
   afterRender() {
     super.afterRender();
     this.bindEvents();
+    renderIcons(this.container);
   }
+
 
   bindEvents() {
     const tree = this.container.querySelector("#file-tree");

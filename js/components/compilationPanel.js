@@ -36,13 +36,16 @@ export class CompilationPanel extends Component {
   afterRender() {
     super.afterRender();
     this.update();
+    renderIcons(this.container);
   }
 
   update() {
     this.renderCategories();
     this.renderPhases();
     this.renderBody();
+    renderIcons(this.container);
   }
+
 
   renderCategories() {
     const el = this.container.querySelector("#comp-tabs-category");
