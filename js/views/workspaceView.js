@@ -7,51 +7,52 @@ import { makeResizable } from "../components/resizable.js";
 import { FileExplorer } from "../components/fileExplorer.js";
 import { CodeEditor } from "../components/codeEditor.js";
 import { CompilationPanel } from "../components/compilationPanel.js";
+import { Component } from "../lib/system.js";
 
-export class WorkspaceView {
+export class WorkspaceView extends Component {
   constructor(container) {
-    this.container = container;
+    super(container, uiStore);
     this.children = [];
-    this.unsubscribeUi = null;
-    this.render();
-    this.initChildren();
-    this.bindEvents();
+    this.mount();
     
     // Kick off auth check
     authStore.hydrate();
-    const { isAuthenticated, token } = authStore.getState();
-    if (!isAuthenticated && !token) {
+    if (!authStore.getState().isAuthenticated) {
       window.location.hash = "#/auth";
     }
   }
 
   render() {
     this.container.innerHTML = `
-      <div class="h-screen flex flex-col bg-surface-0 overflow-hidden">
+      <div class="h-screen flex flex-col bg-surface-0 overflow-hidden text-foreground">
         <div id="workspace-header-container"></div>
         
-        <main class="flex-1 min-h-0 p-1_5 flex flex-row">
+        <main class="flex-1 min-h-0 flex flex-row">
           <!-- Sidebar Explorer -->
-          <div id="explorer-panel" class="h-full pr-1 shrink-0" style="flex: 0 0 250px;">
+          <div id="explorer-panel" class="h-full shrink-0" style="flex: 0 0 250px;">
             <div id="workspace-explorer-container" class="h-full"></div>
           </div>
           
           <!-- H-Resizer -->
-          <div id="h-resizer" class="w-1_5 shrink-0 bg-transparent hover:bg-primary/30 transition-colors cursor-col-resize z-10 mx-0.5"></div>
+          <div id="h-resizer" class="w-1 px-0.5 shrink-0 bg-transparent hover:bg-primary/30 transition-colors cursor-col-resize z-10">
+             <div class="h-full w-px bg-white/5 mx-auto"></div>
+          </div>
           
           <!-- Main Content Area -->
           <div class="flex-1 h-full min-w-0 flex flex-col" id="main-content-area">
             <!-- Editor -->
             <div id="editor-panel" class="w-full shrink-0" style="flex: 0 0 60%;">
-              <div id="workspace-editor-container" class="h-full pb-1"></div>
+              <div id="workspace-editor-container" class="h-full px-1.5 py-1"></div>
             </div>
             
             <!-- V-Resizer -->
-            <div id="v-resizer" class="h-1_5 shrink-0 bg-transparent hover:bg-primary/30 transition-colors cursor-row-resize z-10 my-0.5"></div>
+            <div id="v-resizer" class="h-1 py-0.5 shrink-0 bg-transparent hover:bg-primary/30 transition-colors cursor-row-resize z-10">
+               <div class="w-full h-px bg-white/5 my-auto"></div>
+            </div>
             
             <!-- Compilation Panel -->
-            <div id="compilation-panel" class="w-full flex-1 min-h-0 pt-1">
-              <div id="workspace-compilation-container" class="h-full"></div>
+            <div id="compilation-panel" class="w-full flex-1 min-h-0">
+              <div id="workspace-compilation-container" class="h-full px-1.5 py-1"></div>
             </div>
           </div>
         </main>
@@ -62,7 +63,7 @@ export class WorkspaceView {
     `;
   }
 
-  async initChildren() {
+  initChildren() {
     this.children.push(new Header(this.container.querySelector("#workspace-header-container")));
     this.children.push(new StatusBar(this.container.querySelector("#workspace-statusbar-container")));
     this.children.push(new CommandPalette(this.container.querySelector("#workspace-cmdpalette-container")));
@@ -82,30 +83,26 @@ export class WorkspaceView {
       () => uiStore.getState().layoutDir
     );
 
-    // Initialize stores to globals to make them accessible to command palette etc.
-    window.fsStoreInstance = (await import("../store/fsStore.js")).fsStore;
-
+    // Dynamic component loading
     this.children.push(new FileExplorer(this.container.querySelector("#workspace-explorer-container")));
     this.children.push(new CodeEditor(this.container.querySelector("#workspace-editor-container")));
     this.children.push(new CompilationPanel(this.container.querySelector("#workspace-compilation-container")));
   }
 
-  bindEvents() {
+  afterRender() {
+    super.afterRender();
+    this.initChildren();
+    this.listenToState();
+  }
+
+  listenToState() {
     const explorerPanel = this.container.querySelector("#explorer-panel");
     const hResizer = this.container.querySelector("#h-resizer");
 
     this.unsubscribeUi = uiStore.subscribe(state => {
       // Toggle explorer
-      if (state.explorerCollapsed) {
-        explorerPanel.style.flexBasis = "0px";
-        explorerPanel.style.overflow = "hidden";
-        hResizer.style.pointerEvents = "none";
-        hResizer.style.opacity = "0.2";
-      } else {
-        explorerPanel.style.flexBasis = "250px";
-        hResizer.style.pointerEvents = "auto";
-        hResizer.style.opacity = "1";
-      }
+      explorerPanel.style.display = state.explorerCollapsed ? "none" : "block";
+      hResizer.style.display = state.explorerCollapsed ? "none" : "block";
 
       // Toggle layout direction
       const mainContent = this.container.querySelector("#main-content-area");
@@ -115,32 +112,22 @@ export class WorkspaceView {
       if (state.layoutDir === "horizontal") {
         mainContent.classList.remove("flex-col");
         mainContent.classList.add("flex-row");
-        
-        vResizer.classList.remove("h-1_5", "cursor-row-resize", "my-0.5");
-        vResizer.classList.add("w-1_5", "cursor-col-resize", "mx-0.5");
-        
-        compPanel.classList.remove("pt-1");
-        compPanel.classList.add("pl-1");
+        vResizer.classList.add("w-1", "cursor-col-resize");
+        vResizer.classList.remove("h-1", "cursor-row-resize");
       } else {
         mainContent.classList.remove("flex-row");
         mainContent.classList.add("flex-col");
-        
-        vResizer.classList.remove("w-1_5", "cursor-col-resize", "mx-0.5");
-        vResizer.classList.add("h-1_5", "cursor-row-resize", "my-0.5");
-        
-        compPanel.classList.remove("pl-1");
-        compPanel.classList.add("pt-1");
+        vResizer.classList.remove("w-1", "cursor-col-resize");
+        vResizer.classList.add("h-1", "cursor-row-resize");
       }
     });
   }
 
   destroy() {
+    super.destroy();
     if (this.cleanupHResizer) this.cleanupHResizer();
     if (this.cleanupVResizer) this.cleanupVResizer();
     if (this.unsubscribeUi) this.unsubscribeUi();
-    this.children.forEach(c => {
-      if (c.destroy) c.destroy();
-    });
-    this.container.innerHTML = "";
+    this.children.forEach(c => c.destroy && c.destroy());
   }
 }

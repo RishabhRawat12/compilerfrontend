@@ -1,4 +1,5 @@
 import { compilerStore } from "../store/compilerStore.js";
+import { renderIcons } from "../lib/utils.js";
 
 export class StatusBar {
   constructor(container) {
@@ -32,10 +33,7 @@ export class StatusBar {
         </div>
       </footer>
     `;
-
-    if (window.lucide) {
-      lucide.createIcons({ root: this.container });
-    }
+    renderIcons(this.container);
   }
 
   bindEvents() {

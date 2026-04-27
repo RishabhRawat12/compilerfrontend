@@ -19,3 +19,16 @@ export function debounce(func, wait) {
 export function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
+
+/**
+ * Re-initialize Lucide icons in a given container
+ */
+export function renderIcons(root = document) {
+  if (window.lucide) {
+    window.lucide.createIcons({
+      icons: window.lucide.icons || window.lucide,
+      root: root
+    });
+  }
+}
+

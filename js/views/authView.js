@@ -1,5 +1,6 @@
 import { authStore } from "../store/authStore.js";
 import { toast } from "../lib/toast.js";
+import { renderIcons } from "../lib/utils.js";
 
 export class AuthView {
   constructor(container) {
@@ -7,6 +8,7 @@ export class AuthView {
     this.render();
     this.bindEvents();
   }
+
 
   render() {
     this.container.innerHTML = `
@@ -61,6 +63,7 @@ export class AuthView {
         </div>
       </main>
     `;
+    renderIcons(this.container);
   }
 
   bindEvents() {

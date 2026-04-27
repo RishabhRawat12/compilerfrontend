@@ -1,90 +1,52 @@
 import { fsStore } from "../store/fsStore.js";
-import { getFileIcon } from "../lib/fileIcons.js";
-import { toast } from "../lib/toast.js";
+import { uiStore } from "../store/uiStore.js";
+import { renderIcons } from "../lib/utils.js";
+import { Component } from "../lib/system.js";
 
-export class FileExplorer {
+export class FileExplorer extends Component {
   constructor(container) {
-    this.container = container;
-    this.unsubscribe = null;
-    this.state = { tree: [], activeFileId: null };
-    this.openFolders = new Set(); // Track expanded folders
-    
-    // UI state
-    this.pendingNode = null; // { type, parentId }
-    this.renamingNodeId = null;
-
-    this.render();
-    this.bindEvents();
-    
-    // Subscribe to fsStore
-    this.unsubscribe = fsStore.subscribe(s => {
-      this.state = s;
-      this.renderTree();
-    });
-
-    // initial fetch
-    fsStore.refresh();
+    super(container, fsStore);
+    this.mount();
   }
 
   render() {
+    const { tree, loading, activeFileId } = fsStore.getState();
+    const { explorerCollapsed } = uiStore.getState();
+
+    if (explorerCollapsed) return;
+
     this.container.innerHTML = `
-      <div class="h-full flex flex-col bg-surface-1 border border-border rounded-lg overflow-hidden select-none text-sm">
-        <div class="flex items-center justify-between px-3 h-9 border-b border-border bg-surface-1 shrink-0">
-          <span class="text-xs-tight font-semibold uppercase tracking-[0.12em] text-muted-foreground">Explorer</span>
-          <div class="flex items-center gap-0.5" id="explorer-actions">
-            <button class="size-6 text-muted-foreground hover:text-foreground flex items-center justify-center rounded hover:bg-surface-2" data-action="new-file" title="New file">
-              <i data-lucide="file-plus" class="size-3.5"></i>
+      <aside class="flex flex-col h-full bg-surface-0 select-none">
+        <div class="h-9 px-3 flex items-center justify-between border-b border-white/5">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">Explorer</span>
+          <div class="flex items-center gap-1">
+            <button class="btn-ghost size-5 p-0" id="refresh-fs-btn" title="Refresh">
+              <i data-lucide="rotate-cw" class="size-3"></i>
             </button>
-            <button class="size-6 text-muted-foreground hover:text-foreground flex items-center justify-center rounded hover:bg-surface-2" data-action="new-folder" title="New folder">
-              <i data-lucide="folder-plus" class="size-3.5"></i>
+            <button class="btn-ghost size-5 p-0" id="new-file-btn" title="New File">
+              <i data-lucide="file-plus" class="size-3"></i>
             </button>
           </div>
         </div>
-        
-        <div class="flex-1 overflow-auto py-1 min-h-0" id="explorer-tree">
-          <!-- Tree injected here -->
-        </div>
 
-        <!-- Pending Input Row (hidden) -->
-        <div id="explorer-pending" class="hidden px-2 py-1 items-center gap-2 text-xs">
-          <i data-lucide="file" class="size-3.5 shrink-0 text-muted-foreground"></i>
-          <input type="text" id="pending-input" class="w-full bg-surface-3 border border-primary/50 text-foreground rounded px-1 outline-none font-mono">
+        <div id="file-tree" class="flex-1 overflow-y-auto py-2 scrollbar-none">
+          ${loading ? '<div class="px-4 py-2 text-xs text-muted-foreground">Loading…</div>' : this.renderTree(tree, activeFileId)}
         </div>
-        
-        <!-- Context Menu modal -->
-        <div id="explorer-context-menu" class="hidden fixed bg-popover text-popover-foreground border border-border rounded-md shadow-md py-1 z-50 text-xs w-32">
-          <button class="w-full text-left px-3 py-1.5 hover:bg-surface-2" data-ctx="new-file">New file</button>
-          <button class="w-full text-left px-3 py-1.5 hover:bg-surface-2" data-ctx="new-folder">New folder</button>
-          <div class="h-px bg-border my-1"></div>
-          <button class="w-full text-left px-3 py-1.5 hover:bg-surface-2" data-ctx="rename">Rename</button>
-          <div class="h-px bg-border my-1"></div>
-          <button class="w-full text-left px-3 py-1.5 hover:bg-destructive/20 text-destructive focus:text-destructive" data-ctx="delete">Delete</button>
-        </div>
-      </div>
+      </aside>
     `;
-
-    if (window.lucide) lucide.createIcons({ root: this.container });
-  }
-
-  renderTree() {
-    const treeContainer = this.container.querySelector("#explorer-tree");
-    
-    if (this.state.loading && !this.state.tree.length) {
-      treeContainer.innerHTML = `<div class="flex items-center gap-2 px-3 py-6 text-xs text-muted-foreground"><i data-lucide="loader-2" class="size-3.5 animate-spin"></i> Loading…</div>`;
-      if (window.lucide) lucide.createIcons({ root: treeContainer });
-      return;
     }
 
     if (!this.state.tree.length) {
       treeContainer.innerHTML = `
-        <div class="px-3 py-8 text-center">
-          <p class="text-xs text-muted-foreground mb-3">No files yet</p>
-          <button class="btn btn-sm text-primary border border-primary/30" id="btn-empty-new-file">
-            <i data-lucide="file-plus" class="size-3.5 mr-1.5"></i> New file
+        <div class="h-full flex flex-col items-center justify-center pb-12">
+          <p class="text-sm text-subtle-foreground mb-4">No files yet</p>
+          <button class="flex items-center gap-2 px-6 py-2 bg-primary/10 border border-primary/30 rounded-full text-foreground hover:bg-primary/20 transition-all group" id="btn-empty-new-file">
+            <i data-lucide="file-plus" class="size-4 group-hover:scale-110 transition-transform stroke-2"></i>
+            <span class="text-sm font-semibold tracking-wide">New file</span>
           </button>
         </div>
       `;
-      if (window.lucide) lucide.createIcons({ root: treeContainer });
+      renderIcons(treeContainer);
       const emptyBtn = treeContainer.querySelector("#btn-empty-new-file");
       if (emptyBtn) {
         emptyBtn.addEventListener("click", () => this.showPendingInput('file', null));
@@ -101,8 +63,7 @@ export class FileExplorer {
     treeContainer.innerHTML = "";
     treeContainer.appendChild(ul);
     
-    // Explicitly scope lucide insertion for performance
-    if (window.lucide) lucide.createIcons({ root: treeContainer });
+    renderIcons(treeContainer);
 
     if (this.renamingNodeId) {
       const input = treeContainer.querySelector(`#rename-${this.renamingNodeId}`);
@@ -217,7 +178,7 @@ export class FileExplorer {
     // Set icon based on type
     const lucideEl = pendingRow.querySelector("i");
     lucideEl.setAttribute("data-lucide", type === 'folder' ? 'folder' : 'file');
-    if (window.lucide) lucide.createIcons({ root: pendingRow });
+    renderIcons(pendingRow);
 
     input.value = "";
     input.placeholder = type === 'folder' ? "folder_name" : "main.c";

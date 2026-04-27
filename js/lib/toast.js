@@ -1,3 +1,5 @@
+import { renderIcons } from "./utils.js";
+
 export const toast = {
   container: null,
 
@@ -41,9 +43,7 @@ export const toast = {
 
     // Append and render icons inside toast
     this.container.appendChild(el);
-    if (window.lucide) {
-      lucide.createIcons({ root: el });
-    }
+    renderIcons(el);
 
     // Bind close
     const closeBtn = el.querySelector('button');

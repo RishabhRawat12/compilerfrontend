@@ -1,5 +1,6 @@
 import { uiStore } from "../store/uiStore.js";
-import { fsStore } from "../store/fsStore.js"; // Note: we'll create this later
+import { fsStore } from "../store/fsStore.js";
+import { renderIcons } from "../lib/utils.js";
 
 export class CommandPalette {
   constructor(container) {
@@ -28,10 +29,7 @@ export class CommandPalette {
         </div>
       </div>
     `;
-
-    if (window.lucide) {
-      lucide.createIcons({ root: this.container });
-    }
+    renderIcons(this.container);
   }
 
   bindEvents() {
@@ -77,8 +75,7 @@ export class CommandPalette {
             ${f.name}
           </button>
         `).join("");
-        
-        if (window.lucide) lucide.createIcons({ root: resultsContainer });
+        renderIcons(resultsContainer);
       }
     });
 

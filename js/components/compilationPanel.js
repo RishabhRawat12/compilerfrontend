@@ -1,4 +1,5 @@
 import { compilerStore, PHASES } from "../store/compilerStore.js";
+import { renderIcons } from "../lib/utils.js";
 
 const CATEGORIES = [
   { id: "problems", label: "Problems" },
@@ -11,128 +12,85 @@ const PHASE_LABELS = {
   lexical: "Lexical",
   syntax: "Syntax",
   semantic: "Semantic",
-  intermediate: "IR"
-};
+import { compilerStore, CATEGORIES } from "../store/compilerStore.js";
+import { renderIcons, cn } from "../lib/utils.js";
+import { Component } from "../lib/system.js";
 
-function jumpToLine(line, phase) {
-  if (phase) compilerStore.setPhase(phase);
-  window.dispatchEvent(new CustomEvent("compilerhub:goto-line", { detail: { line } }));
-}
-
-export class CompilationPanel {
+export class CompilationPanel extends Component {
   constructor(container) {
-    this.container = container;
-    this.unsubscribe = null;
-    this.astMode = "tree"; // "tree" | "json"
-    
-    this.render();
-    this.bindEvents();
-
-    this.unsubscribe = compilerStore.subscribe(() => {
-      this.updateView();
-    });
-    
-    // Set initial view assuming compilation hasn't happened
-    this.updateView();
+    super(container, compilerStore);
+    this.mount();
   }
 
   render() {
     this.container.innerHTML = `
-      <section class="flex flex-col h-full overflow-hidden bg-surface-1 border border-border rounded-lg relative">
-        <div id="comp-tabs-category" class="compilation-tabs-list" role="tablist">
-          <!-- Categories injected here -->
+      <section class="flex flex-col h-full bg-surface-1 border border-border rounded-lg overflow-hidden relative">
+        <div id="comp-tabs-category" class="h-9 flex items-center bg-surface-0 border-b border-border px-1 shrink-0 gap-0.5 overflow-x-auto scrollbar-none">
+          <!-- Categories -->
         </div>
         
-        <div id="comp-tabs-phase" class="flex h-auto w-full items-center justify-start gap-0.5 border-b border-border bg-surface-1 px-2 py-1.5 hidden">
-          <!-- Phases injected here -->
+        <div id="comp-tabs-phase" class="h-8 flex items-center bg-surface-1 border-b border-white/5 px-2 gap-1 overflow-x-auto scrollbar-none hidden">
+          <!-- Phases -->
         </div>
 
-        <div id="comp-body" class="flex-1 min-h-0 overflow-auto bg-terminal font-mono text-xs leading-[1.6] text-syntax-base relative">
-          <!-- Main Output Content injected here -->
+        <div id="comp-body" class="flex-1 min-h-0 overflow-auto bg-[#0a0d18] font-mono text-xs leading-[1.6] text-syntax-base scroll-strategy">
+          <!-- Body -->
         </div>
       </section>
     `;
   }
 
-  updateView() {
+  afterRender() {
+    super.afterRender();
+    this.update();
+  }
+
+  update() {
     this.renderCategories();
     this.renderPhases();
     this.renderBody();
   }
 
   renderCategories() {
-    const parent = this.container.querySelector("#comp-tabs-category");
-    const s = compilerStore.getState();
-    const errCount = compilerStore.totalErrors();
-    const warnCount = compilerStore.totalWarnings();
-    const problemCount = errCount + warnCount;
+    const el = this.container.querySelector("#comp-tabs-category");
+    const { category } = compilerStore.getState();
 
-    parent.innerHTML = CATEGORIES.map(c => {
-      const active = s.category === c.id;
-      let count = null;
-      if (c.id === "problems") count = problemCount;
-      else if (c.id === "error") count = errCount;
-      else if (c.id === "warning") count = warnCount;
+    el.innerHTML = CATEGORIES.map(c => `
+      <button class="h-full px-3 text-[11px] font-mono transition-colors ${category === c.id ? 'bg-surface-1 text-primary' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'}" data-id="${c.id}">
+        ${c.label}
+      </button>
+    `).join("");
 
-      let badgeHtml = "";
-      if (count !== null && count > 0) {
-        const isErr = c.id === "error" || (c.id === "problems" && errCount > 0);
-        const bgClass = isErr ? "bg-destructive/15 text-syntax-error" : "bg-warning/15 text-syntax-warning";
-        badgeHtml = `<span class="px-1 min-w-4 text-center rounded text-2xs font-mono inline-block ${bgClass} ml-1_5">${count}</span>`;
-      }
-
-      return `
-        <button class="compilation-tab" data-state="${active ? 'active' : 'inactive'}" data-tab="${c.id}">
-          ${c.label} ${badgeHtml}
-          <div class="compilation-tab-indicator"></div>
-        </button>
-      `;
-    }).join("");
+    el.onclick = (e) => {
+      const btn = e.target.closest("[data-id]");
+      if (btn) compilerStore.setCategory(btn.dataset.id);
+    };
   }
 
   renderPhases() {
-    const parent = this.container.querySelector("#comp-tabs-phase");
-    const s = compilerStore.getState();
+    const el = this.container.querySelector("#comp-tabs-phase");
+    const { category, phaseId, response } = compilerStore.getState();
+    const cat = CATEGORIES.find(c => c.id === category);
 
-    if (s.category === "problems") {
-      parent.classList.add("hidden");
-      return;
-    }
-
-    parent.classList.remove("hidden");
-    parent.innerHTML = PHASES.map(p => {
-      const active = s.phase === p;
-      return `
-        <button class="phase-tab" data-state="${active ? 'active' : 'inactive'}" data-phase="${p}">
-          ${PHASE_LABELS[p]}
+    if (cat?.hasPhases && response) {
+      el.classList.remove("hidden");
+      const phases = response[category] || [];
+      el.innerHTML = phases.map(p => `
+        <button class="h-6 px-3 rounded-md text-[10px] whitespace-nowrap transition-colors ${phaseId === p.id ? 'bg-primary text-white font-bold shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-white/5'}" data-phase="${p.id}">
+          ${p.name}
         </button>
-      `;
-    }).join("");
+      `).join("");
+
+      el.onclick = (e) => {
+        const btn = e.target.closest("[data-phase]");
+        if (btn) compilerStore.setPhase(btn.dataset.phase);
+      };
+    } else {
+      el.classList.add("hidden");
+    }
   }
 
   renderBody() {
-    const body = this.container.querySelector("#comp-body");
-    const s = compilerStore.getState();
-
-    if (s.isCompiling) {
-      body.innerHTML = `
-        <div class="px-4 py-4 flex items-center gap-2 text-muted-foreground">
-          <i data-lucide="loader-2" class="size-3.5 animate-spin text-primary"></i> <span class="text-xs">Compiling…</span>
-        </div>
-      `;
-      if (window.lucide) lucide.createIcons({ root: body });
-      return;
-    }
-
-    if (!s.response) {
-      const cLabel = CATEGORIES.find(c => c.id === s.category)?.label || "";
-      body.innerHTML = `
-        <div class="px-4 py-4"><span class="text-success">❯</span> <span class="text-muted-foreground ml-2">waiting for compile — showing ${cLabel.toLowerCase()} / ${PHASE_LABELS[s.phase]}</span></div>
-      `;
-      return;
-    }
-
-    if (s.category === "problems") {
       const items = compilerStore.allDiagnostics();
       if (!items.length) {
         body.innerHTML = `<div class="px-4 py-4"><span class="text-success">❯</span> <span class="text-success ml-2">no problems detected</span></div>`;
@@ -175,7 +133,7 @@ export class CompilationPanel {
       this.renderOutputPhase(body, s.phase, s.response.data[s.phase]);
     }
 
-    if (window.lucide) lucide.createIcons({ root: body });
+    renderIcons(body);
 
     // Expose jump globally just for ease of HTML string inline handlers
     window.compilationJump = jumpToLine;
@@ -360,7 +318,7 @@ export class CompilationPanel {
       wrapper.appendChild(childrenContainer);
     }
 
-    if (window.lucide) lucide.createIcons({ root: btn });
+    renderIcons(btn);
     return wrapper;
   }
 
@@ -400,7 +358,7 @@ export class CompilationPanel {
       }
     });
 
-    if (window.lucide) lucide.createIcons({ root: btn });
+    renderIcons(btn);
     return wrapper;
   }
 

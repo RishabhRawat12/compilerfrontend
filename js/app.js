@@ -49,10 +49,7 @@ class App {
       this.root.innerHTML = `<div class="p-8"><h1 class="text-xl">404 - Not Found</h1><a href="#/" class="text-primary hover:underline">Go Home</a></div>`;
     }
 
-    // After mounting, initialize Lucide icons
-    if (window.lucide) {
-      lucide.createIcons({ root: this.root });
-    }
+    renderIcons(this.root);
   }
 
   setupGlobalShortcuts() {

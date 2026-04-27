@@ -4,7 +4,7 @@ import { compilerStore, PHASES } from "../store/compilerStore.js";
 import { getFileIcon, getLanguageFromName } from "../lib/fileIcons.js";
 import { COMPILERHUB_THEME, defineCompilerHubTheme } from "../lib/monacoTheme.js";
 import { toast } from "../lib/toast.js";
-import { debounce } from "../lib/utils.js";
+import { debounce, renderIcons } from "../lib/utils.js";
 
 const DEFAULT_SNIPPET = `int main() {
     int x = 10;
@@ -64,27 +64,6 @@ export class CodeEditor {
           this.models[modelId] = model;
         }
 
-        if (this.editor.getModel() !== model) {
-          this.editor.setModel(model);
-        } else if (model && model.getValue() !== val) {
-          this.editor.setValue(val);
-        }
-      }
-      this.syncMarkers();
-    });
-
-    this.unsubscribeUi = uiStore.subscribe(s => {
-      this.uiState = s;
-      if (this.editor) {
-        this.editor.updateOptions({ fontSize: s.fontSize });
-      }
-      const fontSpan = this.container.querySelector("#editor-font-size");
-      if (fontSpan) fontSpan.textContent = s.fontSize;
-    });
-
-    this.unsubscribeComp = compilerStore.subscribe(s => {
-      this.compilerState = s;
-      this.renderTabs(); // for run button state if needed
       this.syncMarkers();
       
       const runBtn = this.container.querySelector("#btn-run");
@@ -93,7 +72,7 @@ export class CodeEditor {
         runBtn.innerHTML = s.isCompiling 
           ? `<i data-lucide="loader-2" class="size-3 mr-1 animate-spin"></i> Running…`
           : `<i data-lucide="play" class="size-3 mr-1"></i> Run`;
-        if (window.lucide) lucide.createIcons({ root: runBtn });
+        renderIcons(runBtn);
       }
     });
 
@@ -117,27 +96,27 @@ export class CodeEditor {
         </div>
 
         <!-- Breadcrumbs & Actions Row -->
-        <div class="flex items-center justify-between gap-2 h-8 px-3 border-b border-border bg-surface-1">
-          <nav aria-label="File path" class="min-w-0 text-xs-tight font-mono text-muted-foreground">
+        <div class="breadcrumb-bar shrink-0">
+          <nav aria-label="File path" class="min-w-0 text-[11px] font-mono text-muted-foreground/80">
             <ol class="flex items-center gap-1 min-w-0" id="editor-breadcrumbs">
             </ol>
           </nav>
           
-          <div class="flex items-center gap-1.5 shrink-0">
-            <div class="flex items-center rounded-md border border-border bg-surface-2 overflow-hidden">
-              <button id="btn-font-dec" class="size-6 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-3">
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center rounded-lg border border-border bg-surface-2/50 overflow-hidden h-6">
+              <button id="btn-font-dec" class="size-6 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-3 transition-colors">
                 <i data-lucide="minus" class="size-3"></i>
               </button>
-              <span id="editor-font-size" class="px-1.5 text-2xs font-mono text-muted-foreground border-x border-border">14</span>
-              <button id="btn-font-inc" class="size-6 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-3">
+              <span id="editor-font-size" class="px-2 text-[10px] font-bold text-muted-foreground/90 border-x border-border/50 h-full flex items-center">14</span>
+              <button id="btn-font-inc" class="size-6 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-3 transition-colors">
                 <i data-lucide="plus" class="size-3"></i>
               </button>
             </div>
-            <button id="btn-export" class="btn btn-ghost btn-sm text-xs-tight text-muted-foreground hover:text-foreground p-1 h-6">
-              <i data-lucide="download" class="size-3 mr-1"></i> Export
+            <button id="btn-export" class="action-pill text-muted-foreground hover:text-foreground hover-bg-white-5 gap-1.5 px-3 transition-all">
+              <i data-lucide="download" class="size-3.5"></i> Export
             </button>
-            <button id="btn-run" class="btn btn-primary btn-sm text-xs-tight p-1 px-2.5 h-6">
-              <i data-lucide="play" class="size-3 mr-1"></i> Run
+            <button id="btn-run" class="action-pill btn-run gap-1.5 px-4 shadow-lg shadow-purple-500/20">
+              <i data-lucide="play" class="size-3.5 fill-current"></i> Run
             </button>
           </div>
         </div>
@@ -150,7 +129,7 @@ export class CodeEditor {
         </div>
       </section>
     `;
-    if (window.lucide) lucide.createIcons({ root: this.container });
+    renderIcons(this.container);
   }
 
   initMonaco() {
@@ -359,11 +338,11 @@ export class CodeEditor {
 
       return `
         <div role="tab" data-id="${t.id}" data-scratch="${t.isScratch}" data-active="${active}" class="${titleClasses}">
-          ${active ? '<span class="absolute top-0 left-0 right-0 h-[2px] bg-primary"></span>' : ''}
-          <i data-lucide="${icon.icon}" class="size-3.5 shrink-0 ${icon.colorClass}"></i>
+          ${active ? '<div class="tab-active-indicator"></div>' : ''}
+          <i data-lucide="${icon.icon}" class="size-3.5 shrink-0" style="color: ${icon.color || 'inherit'}"></i>
           <span class="truncate">${t.name}</span>
           ${!t.isScratch ? `
-            <button class="tab-close-btn ml-1 size-4 flex items-center justify-center rounded hover:bg-surface-3 text-muted-foreground hover:text-foreground">
+            <button class="tab-close-btn ml-1 size-4 flex items-center justify-center rounded hover-bg-white-5 text-muted-foreground hover-text-white transition-all">
               ${showDirtyDot ? '<i data-lucide="circle" class="size-2 text-syntax-warning fill-current"></i>' : '<i data-lucide="x" class="size-3"></i>'}
             </button>
           ` : ''}
@@ -371,7 +350,8 @@ export class CodeEditor {
       `;
     }).join("");
 
-    if (window.lucide) lucide.createIcons({ root: tablist });
+
+    renderIcons(tablist);
 
     // Attach tab events
     const tabNodes = tablist.querySelectorAll('[role="tab"]');
@@ -440,7 +420,7 @@ export class CodeEditor {
         </li>
       `;
     });
-    if (window.lucide) lucide.createIcons({ root: b });
+    renderIcons(b);
   }
 
   renderStatusHint() {
