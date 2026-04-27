@@ -144,8 +144,18 @@ export class CodeEditor extends Component {
     }
   }
 
+  async handleRun() {
+    const code = this.editor ? this.editor.getValue() : fsStore.getState().activeContent;
+    try {
+      await compilerStore.run(code);
+    } catch (err) {
+      console.error("Compilation failed:", err);
+    }
+  }
+
   bindEvents() {
-    this.container.querySelector("#run-btn").onclick = () => compilerStore.compile();
+    this.container.querySelector("#run-btn").onclick = () => this.handleRun();
+
     
     this.container.querySelector("#editor-tabs").onclick = (e) => {
       const close = e.target.closest(".tab-close-btn");
