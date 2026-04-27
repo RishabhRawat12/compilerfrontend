@@ -69,7 +69,12 @@ class FsStore extends Store {
       const { data } = await api.get("/api/fs/tree");
       const files = data.files || [];
       const folders = data.folders || [];
-      this.setState({ files, folders, tree: buildTree(files, folders) });
+      const tree = buildTree(files, folders);
+      const activeFileId = files.length > 0 ? files[0].id : null;
+      const activeContent = files.length > 0 ? files[0].content : "";
+      const openTabs = activeFileId ? [activeFileId] : [];
+      
+      this.setState({ files, folders, tree, activeFileId, activeContent, openTabs });
     } catch (e) {
       // Mock data for demo
       const mockFiles = [
@@ -83,7 +88,10 @@ class FsStore extends Store {
       this.setState({ 
         files: mockFiles, 
         folders: mockFolders, 
-        tree: buildTree(mockFiles, mockFolders) 
+        tree: buildTree(mockFiles, mockFolders),
+        activeFileId: "1",
+        activeContent: mockFiles[0].content,
+        openTabs: ["1"]
       });
       console.warn("Backend not reachable, using mock fs tree for demonstration");
     } finally {

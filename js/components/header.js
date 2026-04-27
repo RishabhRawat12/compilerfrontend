@@ -24,16 +24,16 @@ export class Header extends Component {
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-1">
             <button id="header-menu-btn" class="btn-icon h-7 w-7" aria-label="Toggle explorer">
-              <i data-lucide="${menuIcon}" class="size-18 stroke-1_5"></i>
+              <i data-lucide="${menuIcon}" class="size-4 stroke-[1.5]"></i>
             </button>
             <button id="header-layout-btn" class="btn-icon h-7 w-7" aria-label="Toggle layout">
-              <i data-lucide="${layoutIcon}" class="size-18 stroke-1_5"></i>
+              <i data-lucide="${layoutIcon}" class="size-4 stroke-[1.5]"></i>
             </button>
           </div>
           
           <div class="flex items-center gap-2 ml-1.5 pointer-events-none">
-            <div class="size-6 rounded-md flex items-center justify-center shadow-lg shadow-primary/20" style="background-image: var(--gradient-primary)">
-              <i data-lucide="zap" class="size-3.5 text-white fill-white stroke-2_5"></i>
+            <div class="size-6 rounded-md flex items-center justify-center shadow-lg shadow-primary/20 bg-gradient-to-br from-primary to-primary-glow">
+              <i data-lucide="zap" class="size-3.5 text-white fill-white stroke-[2.5]"></i>
             </div>
             <span class="text-[13px] font-bold tracking-tight text-white/95">CompilerHub</span>
           </div>

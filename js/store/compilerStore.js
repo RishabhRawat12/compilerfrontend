@@ -25,6 +25,14 @@ function normalizeCompileResponse(raw) {
 
 export const PHASES = ["lexical", "syntax", "semantic", "intermediate"];
 
+export const CATEGORIES = [
+  { id: "problems", label: "Problems", hasPhases: false },
+  { id: "output", label: "Output", hasPhases: true },
+  { id: "warning", label: "Warnings", hasPhases: true },
+  { id: "error", label: "Errors", hasPhases: true }
+];
+
+
 class CompilerStore extends Store {
   constructor() {
     super({
