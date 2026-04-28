@@ -20,17 +20,30 @@ export class CodeEditor extends Component {
   }
 
   render() {
-    // Standard structure
     if (this.container.innerHTML) return; 
 
+    const fontSize = uiStore.getState().fontSize;
+
     this.container.innerHTML = `
-      <section class="flex flex-col h-full bg-surface-1 border border-border rounded-lg overflow-hidden relative">
-        <div class="h-9 flex items-center bg-surface-0 border-b border-border pl-1 shrink-0 overflow-x-auto scrollbar-none" id="editor-tabs"></div>
-        <div class="h-8 flex items-center justify-between px-3 bg-surface-1 border-b border-white/5 shrink-0">
-          <div id="editor-breadcrumbs" class="flex items-center gap-1.5 text-[11px] text-muted-foreground font-mono truncate mr-4"></div>
-          <div class="flex items-center gap-1.5">
-            <button id="run-btn" class="btn-primary h-6 px-3 py-0 text-[10px] gap-1.5 shadow-sm">
-              <i data-lucide="play" class="size-3 fill-current"></i> Run
+      <section class="flex flex-col h-full bg-surface-1 border border-border rounded-xl overflow-hidden relative">
+        <div class="flex items-end bg-surface-0 border-b border-border pl-2 shrink-0 pt-2 relative z-10" id="editor-tabs"></div>
+        <div class="h-10 flex items-center justify-between px-4 bg-surface-1 border-b border-white/5 shrink-0 z-0">
+          <div id="editor-breadcrumbs" class="flex items-center text-[12px] text-muted-foreground font-mono truncate mr-4"></div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center bg-surface-2 rounded-md px-1.5 h-6 gap-2">
+              <button id="editor-font-dec" class="hover:text-foreground text-muted-foreground transition-colors p-0 min-w-0" title="Decrease font size">
+                <i data-lucide="minus" class="size-3"></i>
+              </button>
+              <span id="font-size-val" class="text-[11px] font-mono min-w-[14px] text-center">${fontSize}</span>
+              <button id="editor-font-inc" class="hover:text-foreground text-muted-foreground transition-colors p-0 min-w-0" title="Increase font size">
+                <i data-lucide="plus" class="size-3"></i>
+              </button>
+            </div>
+            <button id="export-btn" class="flex items-center gap-1.5 h-6 px-2 text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+              <i data-lucide="download" class="size-3.5"></i> Export
+            </button>
+            <button id="run-btn" class="flex items-center justify-center bg-primary hover:bg-primary/90 text-white fill-white h-7 px-4 rounded-full text-[12px] gap-1.5 shadow-sm font-medium transition-colors">
+              <i data-lucide="play" class="size-3.5 fill-current stroke-white stroke-2"></i> Run
             </button>
           </div>
         </div>
@@ -65,11 +78,11 @@ export class CodeEditor extends Component {
       const active = t.id === activeFileId;
       const icon = getFileIcon(t.name);
       return `
-        <div class="group flex items-center h-full px-3 text-[11px] font-mono cursor-pointer border-r border-border transition-colors ${active ? 'bg-surface-1 text-primary' : 'bg-surface-0 text-muted-foreground hover:bg-surface-1'}" data-id="${t.id}">
-          <i data-lucide="${icon.icon}" class="size-3 mr-2" style="color: ${icon.color}"></i>
+        <div class="group relative z-10 flex items-center h-8 px-4 text-[13px] font-mono cursor-pointer transition-colors ${active ? 'bg-surface-1 text-white border-t-2 border-t-[#a577fa] rounded-t-xl' : 'bg-transparent text-muted-foreground hover:bg-white/5 rounded-t-xl hover:text-white'}" style="${active ? 'margin-bottom: -1px; padding-bottom: 1px;' : ''}" data-id="${t.id}">
+          <i data-lucide="${icon.icon}" class="size-4 mr-2.5" style="color: ${icon.color}"></i>
           <span>${t.name}</span>
-          <button class="ml-2 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity tab-close-btn" data-id="${t.id}">
-            <i data-lucide="x" class="size-3"></i>
+          <button class="ml-3 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity tab-close-btn flex items-center" data-id="${t.id}">
+            <i data-lucide="x" class="size-3.5"></i>
           </button>
         </div>
       `;
@@ -86,7 +99,7 @@ export class CodeEditor extends Component {
       el.innerHTML = "";
       return;
     }
-    el.innerHTML = `<span>src</span><i data-lucide="chevron-right" class="size-3 text-muted-foreground/50"></i><span class="text-foreground">${activeFile.name}</span>`;
+    el.innerHTML = `<span>CompilerHub</span><i data-lucide="chevron-right" class="size-3.5 mx-2 text-muted-foreground/40"></i><span class="text-white/90">${activeFile.name}</span>`;
     renderIcons(el);
   }
 
@@ -94,6 +107,8 @@ export class CodeEditor extends Component {
     if (this.editor) {
       this.editor.updateOptions({ fontSize: uiStore.getState().fontSize });
     }
+    const val = this.container.querySelector("#font-size-val");
+    if (val) val.textContent = uiStore.getState().fontSize;
   }
 
   updateMarkers() {
@@ -157,6 +172,9 @@ export class CodeEditor extends Component {
 
   bindEvents() {
     this.container.querySelector("#run-btn").onclick = () => this.handleRun();
+    this.container.querySelector("#editor-font-inc").onclick = () => uiStore.fontInc();
+    this.container.querySelector("#editor-font-dec").onclick = () => uiStore.fontDec();
+    this.container.querySelector("#export-btn").onclick = () => this.handleExport();
 
     
     this.container.querySelector("#editor-tabs").onclick = (e) => {
@@ -169,6 +187,17 @@ export class CodeEditor extends Component {
       const tab = e.target.closest("[data-id]");
       if (tab) fsStore.pinFile(tab.dataset.id);
     };
+  }
+
+  handleExport() {
+    const code = fsStore.getState().activeContent || "";
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "scratch.c"; // In a real app we'd use the active file's name
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   destroy() {

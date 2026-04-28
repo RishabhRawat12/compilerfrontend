@@ -18,7 +18,7 @@ export class CompilationPanel extends Component {
   render() {
     this.container.innerHTML = `
       <section class="flex flex-col h-full bg-surface-1 border border-border rounded-lg overflow-hidden relative">
-        <div id="comp-tabs-category" class="h-9 flex items-center bg-surface-0 border-b border-border px-1 shrink-0 gap-0.5 overflow-x-auto scrollbar-none">
+        <div id="comp-tabs-category" class="h-9 flex items-center bg-surface-0 border-b border-white/5 shrink-0 overflow-x-auto scrollbar-none">
           <!-- Categories -->
         </div>
         
@@ -53,7 +53,7 @@ export class CompilationPanel extends Component {
     const { category } = compilerStore.getState();
 
     el.innerHTML = CATEGORIES.map(c => `
-      <button class="h-full px-3 text-[11px] font-mono transition-colors ${category === c.id ? 'bg-surface-1 text-primary' : 'text-muted-foreground hover:bg-surface-2 hover:text-foreground'}" data-id="${c.id}">
+      <button class="h-full px-5 text-[11px] font-mono uppercase tracking-widest transition-all ${category === c.id ? 'bg-[#151926] text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-white'}" data-id="${c.id}">
         ${c.label}
       </button>
     `).join("");
@@ -67,10 +67,10 @@ export class CompilationPanel extends Component {
   renderPhases() {
     const el = this.container.querySelector("#comp-tabs-phase");
     if (!el) return;
-    const { category, phase, response } = compilerStore.getState();
+    const { category, phase } = compilerStore.getState();
     const cat = CATEGORIES.find(c => c.id === category);
 
-    if (cat?.hasPhases && response) {
+    if (cat?.hasPhases) {
       el.classList.remove("hidden");
       // PHASES are lexical, syntax, semantic, intermediate
       el.innerHTML = [
@@ -79,7 +79,7 @@ export class CompilationPanel extends Component {
         { id: "semantic", name: "Semantic" },
         { id: "intermediate", name: "IR" }
       ].map(p => `
-        <button class="h-6 px-3 rounded-md text-[10px] whitespace-nowrap transition-colors ${phase === p.id ? 'bg-primary text-white font-bold shadow-sm shadow-primary/20' : 'text-muted-foreground hover:bg-white/5'}" data-phase="${p.id}">
+        <button class="h-6 px-3 rounded text-[11px] font-mono whitespace-nowrap transition-colors ${phase === p.id ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:bg-white/5'}" data-phase="${p.id}">
           ${p.name}
         </button>
       `).join("");
@@ -97,15 +97,21 @@ export class CompilationPanel extends Component {
     const el = this.container.querySelector("#comp-body");
     if (!el) return;
     const { isCompiling, response, category, phase } = compilerStore.getState();
+    const phaseLabel = PHASE_LABELS[phase] || phase;
 
     if (isCompiling) {
-      el.innerHTML = `<div class="p-8 flex items-center justify-center gap-2 text-muted-foreground"><i data-lucide="loader-2" class="size-4 animate-spin text-primary"></i><span>Synthesizing logic…</span></div>`;
-      renderIcons(el);
+      el.innerHTML = `<div class="p-6 text-foreground font-mono text-xs flex shadow-sm animate-pulse">
+        <span class="mr-2 text-[#4ade80]">&gt;</span>
+        <span>waiting for compile &ndash; showing ${category} / ${phaseLabel}</span>
+      </div>`;
       return;
     }
 
     if (!response) {
-      el.innerHTML = `<div class="p-8 text-muted-foreground/30 italic">No output yet. Press Run to compile.</div>`;
+      el.innerHTML = `<div class="p-7 text-muted-foreground font-mono text-xs flex">
+        <span class="mr-2 text-[#4ade80]">&gt;</span>
+        <span>waiting for compile &ndash; showing ${category} / ${phaseLabel}</span>
+      </div>`;
       return;
     }
 

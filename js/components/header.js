@@ -46,16 +46,6 @@ export class Header extends Component {
         </button>
 
         <div class="flex items-center gap-1">
-          <div class="flex items-center bg-surface-2 rounded-md px-1.5 h-6 mr-2 gap-2">
-            <button id="font-dec" class="hover:text-foreground transition-colors p-0 min-w-0" title="Decrease font size">
-              <i data-lucide="minus" class="size-3"></i>
-            </button>
-            <span class="text-[10px] font-mono min-w-[12px] text-center">${fontSize}</span>
-            <button id="font-inc" class="hover:text-foreground transition-colors p-0 min-w-0" title="Increase font size">
-              <i data-lucide="plus" class="size-3"></i>
-            </button>
-          </div>
-
           <div class="relative">
             <button id="header-user-btn" class="btn-ghost h-6 px-2 text-[11px] gap-1">
               <span>${username}</span>
@@ -90,8 +80,6 @@ export class Header extends Component {
     this.container.querySelector("#header-menu-btn").onclick = () => uiStore.toggleExplorer();
     this.container.querySelector("#header-layout-btn").onclick = () => uiStore.toggleLayoutDir();
     this.container.querySelector("#header-search-btn").onclick = () => uiStore.setCommandPaletteOpen(true);
-    this.container.querySelector("#font-inc").onclick = () => uiStore.fontInc();
-    this.container.querySelector("#font-dec").onclick = () => uiStore.fontDec();
     this.container.querySelector("#logout-btn").onclick = () => authStore.logout();
     this.container.querySelector("#show-settings-btn").onclick = () => {
        userDropdown.classList.add("hidden");
