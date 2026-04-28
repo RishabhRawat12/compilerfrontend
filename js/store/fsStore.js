@@ -222,6 +222,14 @@ class FsStore extends Store {
     }
     await this.refresh();
   }
+
+  deleteFile(id) {
+    return this.remove("file", id);
+  }
+
+  deleteFolder(id) {
+    return this.remove("folder", id);
+  }
 }
 
 export const fsStore = new FsStore();

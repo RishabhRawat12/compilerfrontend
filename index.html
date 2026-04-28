@@ -2,28 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CompilerHub</title>
-    <link rel="stylesheet" href="/css/main.css?v=4">
-    <link rel="stylesheet" href="/css/theme.css?v=4">
-    <link rel="stylesheet" href="/css/components.css?v=4">
-    <link rel="stylesheet" href="/css/ui.css?v=4">
-    <!-- Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="CompilerHub - C compiler visualization IDE">
+    <title>CompilerHub - C Compiler IDE</title>
+    <link rel="stylesheet" href="/css/main.css?v=6">
+    <link rel="stylesheet" href="/css/theme.css?v=6">
+    <link rel="stylesheet" href="/css/components.css?v=6">
+    <link rel="stylesheet" href="/css/ui.css?v=6">
+    <link rel="stylesheet" href="/css/enhancements.css?v=1">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Lucide Icons (Must load before Monaco's AMD loader) -->
+    
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <!-- Monaco Editor AMD loader -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
-
-
 </head>
 <body class="bg-surface-0 text-foreground font-sans antialiased overflow-hidden selection:bg-primary/20">
-    <div id="app" class="h-screen w-full relative">
-        <!-- Route views will be injected here -->
-    </div>
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <main id="app" class="h-screen w-full relative" role="application">
+        </main>
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none" aria-live="polite" aria-atomic="true"></div>
 
-    <!-- Scripts -->
-    <script type="module" src="/js/app.js?v=4"></script>
+    <script type="module" src="/js/app.js?v=6"></script>
 </body>
 </html>

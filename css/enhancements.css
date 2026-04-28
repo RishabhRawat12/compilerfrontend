@@ -1,0 +1,388 @@
+/* UI Enhancements CSS */
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: hsl(var(--surface-1));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--surface-3));
+  border-radius: 4px;
+  border: 2px solid hsl(var(--surface-1));
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--surface-2));
+  border-color: hsl(var(--surface-2));
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: hsl(var(--primary) / 0.6);
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-fadeIn { animation: fadeIn 300ms ease-out; }
+.animate-slideInLeft { animation: slideInLeft 300ms ease-out; }
+.animate-slideInRight { animation: slideInRight 300ms ease-out; }
+.animate-popIn { animation: popIn 200ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-rotate { animation: rotate 1s linear infinite; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Dialog/Modal Overlays */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 200ms ease-out;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: hsl(var(--surface-0));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: popIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Command Palette Specific */
+.cmd-item {
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 150ms ease;
+  font-size: 0.875rem;
+}
+
+.cmd-item:hover {
+  background-color: hsl(var(--surface-2));
+}
+
+.cmd-item[data-selected="true"] {
+  background-color: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary));
+}
+
+/* File Explorer Enhancements */
+.tree-node {
+  padding-left: 1rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.tree-node:hover {
+  background-color: hsl(var(--surface-2) / 0.5);
+}
+
+.tree-node[data-selected="true"] {
+  background-color: hsl(var(--primary) / 0.15);
+  border-left-color: hsl(var(--primary));
+}
+
+.tree-toggle {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0.25rem;
+  margin-right: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+}
+
+.tree-toggle:hover {
+  background-color: hsl(var(--surface-2));
+}
+
+/* Status Bar Enhancements */
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.status-item:hover {
+  color: hsl(var(--foreground));
+}
+
+/* Color Swatches */
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  border: 2px solid hsl(var(--border));
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.1);
+  border-color: hsl(var(--foreground));
+}
+
+.color-swatch:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Settings Dialog Tabs */
+.settings-tab {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  transition: all 150ms ease;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.settings-tab:hover {
+  background-color: hsl(var(--surface-2));
+  color: hsl(var(--foreground));
+}
+
+/* Compilation Timeline */
+.phase-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.phase-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.625rem;
+  border: 1px solid hsl(var(--border));
+  transition: all 150ms ease;
+}
+
+.phase-circle.active {
+  background-color: hsl(var(--primary) / 0.2);
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+/* Compilation Output Styles */
+.compilation-output {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: hsl(var(--syntax-base));
+  background-color: hsl(var(--terminal-bg));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.error-line {
+  color: hsl(var(--syntax-error));
+  background-color: hsl(var(--destructive) / 0.1);
+  padding: 0.25rem 0;
+}
+
+.warning-line {
+  color: hsl(var(--syntax-warning));
+  background-color: hsl(var(--warning) / 0.1);
+  padding: 0.25rem 0;
+}
+
+/* Breadcrumb Navigation */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-family: "JetBrains Mono", monospace;
+}
+
+.breadcrumb-sep {
+  color: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* Search/Filter Input */
+.search-input {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background-color: hsl(var(--surface-2));
+  font-size: 0.875rem;
+  transition: all 150ms ease;
+}
+
+.search-input:focus-within {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--surface-2));
+}
+
+/* Accessibility Features */
+button:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: more) {
+  .text-muted-foreground {
+    color: hsl(var(--foreground) / 0.8);
+  }
+  
+  .border {
+    border-color: hsl(var(--border-strong));
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Utility Classes */
+.transition-opacity { transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+.transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+.scale-95 { transform: scale(0.95); }
+.scale-100 { transform: scale(1); }
+.rotate-90 { transform: rotate(90deg); }
+.translate-y-4 { transform: translateY(1rem); }
+
+.fill-warning { fill: hsl(var(--warning)); }
+.text-warning { color: hsl(var(--warning)); }
+.text-success\/90 { color: hsl(var(--success) / 0.9); }
+
+.max-w-md { max-width: 28rem; }
+.max-w-2xl { max-width: 42rem; }
+
+.max-h-96 { max-height: 24rem; }
+.max-h-48 { max-height: 12rem; }
+
+.selection\:bg-primary\/20 ::selection {
+  background-color: hsl(var(--primary) / 0.2);
+}
+
+body {
+  selection: bg-primary/20;
+}
+
+/* Header improvements */
+.header-breadcrumb {
+  font-size: 0.75rem;
+  font-family: "JetBrains Mono", monospace;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Fix for context menus */
+#file-context-menu {
+  min-width: 12rem;
+}
+
+/* Responsive Improvements */
+@media (max-width: 640px) {
+  .modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .hidden.sm\:flex {
+    display: none;
+  }
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Disabled State */
+[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Focus Ring */
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+button:focus-visible.focus-ring,
+input:focus-visible.focus-ring {
+  outline-color: hsl(var(--primary));
+}

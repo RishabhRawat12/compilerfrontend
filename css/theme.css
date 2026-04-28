@@ -8,12 +8,13 @@
   --surface-1: 226 38% 10%;
   --surface-2: 226 35% 14%;
   --surface-3: 226 32% 18%;
+  --surface-hover: 226 32% 22%;
 
   /* Panel cards */
   --card: 226 38% 10%;
   --card-foreground: 220 20% 90%;
 
-  --popover: 226 38% 9%;
+  --popover: 226 38% 12%;
   --popover-foreground: 220 20% 90%;
 
   /* Purple primary */
@@ -21,7 +22,7 @@
   --primary-foreground: 0 0% 100%;
   --primary-glow: 262 92% 76%;
 
-  /* Coral accent for active phase tab */
+  /* Accent / Phase */
   --accent: 0 90% 72%;
   --accent-foreground: 226 40% 10%;
 
@@ -43,10 +44,10 @@
 
   --border: 226 30% 18%;
   --border-strong: 226 28% 26%;
-  --input: 226 30% 16%;
+  --input: 226 30% 14%;
   --ring: 252 90% 68%;
 
-  --radius: 1rem;
+  --radius: 0.375rem;
 
   /* Terminal / syntax color tokens */
   --syntax-keyword: 262 83% 73%;     /* #bb9af7 */
@@ -63,20 +64,10 @@
 
   /* Gradients & shadows */
   --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-  --gradient-panel: linear-gradient(180deg, hsl(226 38% 11%), hsl(226 40% 8%));
-  --shadow-elegant: 0 10px 30px -12px hsl(var(--primary) / 0.45);
-  --shadow-panel: 0 1px 0 hsl(220 20% 100% / 0.04) inset, 0 8px 24px -16px hsl(0 0% 0% / 0.6);
-}
-
-:root {
-  --bg-main: #0b0f17;
-  --bg-surface: #111826;
-  --bg-hover: #1a2233;
-  --bg-active: #1e293b;
-
-  --text-primary: #e5e7eb;
-  --text-secondary: #9ca3af;
-
-  --accent: #6366f1;
-  --border: #1f2937;
+  --gradient-panel: linear-gradient(180deg, hsl(var(--surface-1)), hsl(var(--surface-0)));
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-elegant: 0 10px 30px -12px hsl(var(--primary) / 0.3);
+  --shadow-panel: inset 0 1px 0 hsl(220 20% 100% / 0.05), 0 8px 24px -16px rgba(0, 0, 0, 0.8);
 }
