@@ -1,50 +1,59 @@
 export function makeResizable(separator, firstElement, secondElement, getDirection = () => 'horizontal') {
   let isResizing = false;
-  let startX, startY, startFlexBasis;
+  let startPos = 0;
+  let startSize = 0;
 
   const onMouseDown = (e) => {
     isResizing = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    
-    // Get the current flex-basis or width/height
+
+    const direction = typeof getDirection === 'function' ? getDirection() : getDirection;
+
+    startPos = direction === 'horizontal' ? e.clientX : e.clientY;
+
     const rect = firstElement.getBoundingClientRect();
-    const currentDirection = typeof getDirection === 'function' ? getDirection() : getDirection;
-    startFlexBasis = currentDirection === 'horizontal' ? rect.width : rect.height;
+    startSize = direction === 'horizontal' ? rect.width : rect.height;
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 
-    // Prevent text selection
     document.body.style.userSelect = 'none';
-    document.body.style.cursor = currentDirection === 'horizontal' ? 'col-resize' : 'row-resize';
+    document.body.style.cursor = direction === 'horizontal' ? 'col-resize' : 'row-resize';
   };
 
   const onMouseMove = (e) => {
     if (!isResizing) return;
-    
-    const currentDirection = typeof getDirection === 'function' ? getDirection() : getDirection;
 
-    if (currentDirection === 'horizontal') {
-      const dx = e.clientX - startX;
-      // Calculate new basis in pixels
-      const newBasis = Math.max(100, Math.min(startFlexBasis + dx, window.innerWidth - 100)); // Minimum 100px
-      firstElement.style.flex = `0 0 ${newBasis}px`;
-    } else {
-      const dy = e.clientY - startY;
-      const newBasis = Math.max(100, Math.min(startFlexBasis + dy, window.innerHeight - 100));
-      firstElement.style.flex = `0 0 ${newBasis}px`;
-    }
+    const direction = typeof getDirection === 'function' ? getDirection() : getDirection;
+
+    const currentPos = direction === 'horizontal' ? e.clientX : e.clientY;
+    const delta = currentPos - startPos;
+
+    const parent = firstElement.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+
+    const totalSize = direction === 'horizontal'
+      ? parentRect.width
+      : parentRect.height;
+
+    const minSize = 150; // better minimum
+    const maxSize = totalSize - 150;
+
+    let newSize = startSize + delta;
+    newSize = Math.max(minSize, Math.min(newSize, maxSize));
+
+    firstElement.style.flex = `0 0 ${newSize}px`;
+    secondElement.style.flex = `1 1 auto`;
   };
 
   const onMouseUp = () => {
-    if (isResizing) {
-      isResizing = false;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
-    }
+    if (!isResizing) return;
+
+    isResizing = false;
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
   };
 
   separator.addEventListener('mousedown', onMouseDown);

@@ -216,3 +216,17 @@
   background-color: hsl(var(--primary) / 0.2);
   color: hsl(var(--primary));
 }
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}

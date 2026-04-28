@@ -179,6 +179,7 @@ code, pre, .font-mono {
 .mb-8 { margin-bottom: 2rem; }
 .mr-1_5 { margin-right: 0.375rem; }
 
+
 /* Typography */
 .text-xs { font-size: 0.75rem; line-height: 1rem; }
 .text-xs-tight { font-size: 0.75rem; line-height: 1.2; }
@@ -249,6 +250,8 @@ code, pre, .font-mono {
 .rounded-xl { border-radius: 0.75rem; }
 .rounded-none { border-radius: 0; }
 
+.border-l-2 { border-left-width: 2px; border-left-style: solid; }
+.border-primary { border-color: hsl(var(--primary)); }
 /* Misc */
 .relative { position: relative; }
 .absolute { position: absolute; }

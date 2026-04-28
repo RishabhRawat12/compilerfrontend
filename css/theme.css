@@ -69,5 +69,14 @@
 }
 
 :root {
-  color-scheme: dark;
+  --bg-main: #0b0f17;
+  --bg-surface: #111826;
+  --bg-hover: #1a2233;
+  --bg-active: #1e293b;
+
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+
+  --accent: #6366f1;
+  --border: #1f2937;
 }
