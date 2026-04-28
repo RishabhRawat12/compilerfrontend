@@ -11,6 +11,7 @@ export class FileExplorer extends Component {
     this.dialog = new FsActionDialog();
     this.collapsedFolders = new Set();
     this.mount();
+    // initial fetch
     fsStore.refresh();
   }
 
@@ -25,81 +26,60 @@ export class FileExplorer extends Component {
 
     this.container.innerHTML = `
       <aside class="flex flex-col h-full bg-surface-0 select-none">
-
-        <!-- HEADER -->
-        <div class="h-11 px-3 flex items-center justify-between border-b border-border/50 shrink-0">
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-            Explorer
-          </span>
-
+        <div class="h-10 px-4 flex items-center justify-between border-b border-border/50 shrink-0">
+          <span class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Explorer</span>
           <div class="flex items-center gap-1">
-            <button class="btn-icon size-7 text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded-md transition-all" id="new-file-btn" title="New File">
-              <i data-lucide="file-plus" class="size-4"></i>
+            <button class="btn-icon size-6 text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded transition-colors" id="new-file-btn" title="New File">
+              <i data-lucide="file-plus" class="size-3.5"></i>
             </button>
-            <button class="btn-icon size-7 text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded-md transition-all" id="new-folder-btn" title="New Folder">
-              <i data-lucide="folder-plus" class="size-4"></i>
+            <button class="btn-icon size-6 text-muted-foreground hover:text-foreground hover:bg-surface-2 rounded transition-colors" id="new-folder-btn" title="New Folder">
+              <i data-lucide="folder-plus" class="size-3.5"></i>
             </button>
           </div>
         </div>
 
-        <!-- TREE -->
-        <div id="file-tree" class="flex-1 overflow-y-auto py-2">
-          ${loading && !tree.length
-            ? '<div class="px-4 py-2 text-xs text-muted-foreground">Loading…</div>'
-            : this.renderTree(tree, activeFileId)}
+        <div id="file-tree" class="flex-1 overflow-y-auto py-3 scrollbar-none">
+          ${loading && !tree.length ? '<div class="px-4 py-2 text-xs text-muted-foreground">Loading…</div>' : this.renderTree(tree, activeFileId)}
         </div>
-
       </aside>
     `;
   }
 
   renderTree(nodes, activeId, depth = 0) {
     if (!nodes || nodes.length === 0) {
-      if (depth === 0) {
-        return `<div class="px-4 py-2 text-[12px] text-muted-foreground italic">No files found.</div>`;
-      }
-      return "";
+      if (depth === 0) return '<div class="px-4 py-2 text-[11px] text-muted-foreground italic">No files found.</div>';
+      return '';
     }
 
     return nodes.map(node => {
       const isActive = node.id === activeId;
       const isFolder = node.type === "folder";
       const isCollapsed = this.collapsedFolders.has(node.id);
-
+      
       let iconName = "file";
-      let iconColor = "text-muted-foreground";
+      let iconColorClass = "text-muted-foreground";
       let textWeight = "font-normal";
 
       if (isFolder) {
         iconName = isCollapsed ? "folder" : "folder-open";
-        iconColor = "text-muted-foreground/80";
-        textWeight = "font-medium";
+        iconColorClass = "text-muted-foreground/80";
+        textWeight = "font-semibold";
       } else {
         const fileIconData = getFileIcon(node.name);
         iconName = fileIconData.icon;
-        iconColor = isActive ? "text-primary" : fileIconData.colorClass;
+        iconColorClass = isActive ? "text-primary" : fileIconData.colorClass;
       }
 
-      // 🔥 Better indentation
-      const paddingLeft = depth * 18 + 14;
-
-      // 🔥 Stronger states
-      const base = "tree-node flex items-center h-9 rounded-md cursor-pointer transition-all border-l-2";
-      const state = isActive
-        ? "bg-primary/15 border-primary text-foreground"
-        : "border-transparent text-muted-foreground hover:bg-surface-2 hover:text-foreground";
+      const paddingLeft = depth * 16 + 16;
+      const activeBg = isActive ? "bg-primary/15" : "hover:bg-white/5";
+      const activeBorder = isActive ? "border-primary" : "border-transparent";
+      const activeText = isActive ? "text-foreground font-medium" : "text-muted-foreground/90 group-hover:text-foreground";
 
       let html = `
-        <div 
-          class="${base} ${state}" 
-          data-id="${node.id}" 
-          data-type="${node.type}" 
-          style="padding-left: ${paddingLeft}px"
-        >
-          <i data-lucide="${iconName}" class="size-4 mr-2 shrink-0 ${iconColor}"></i>
-          <span class="text-[13.5px] truncate ${textWeight}">
-            ${node.name}
-          </span>
+        <div class="tree-node group flex items-center h-8 cursor-pointer transition-colors border-l-2 ${activeBorder} ${activeBg}" 
+             data-id="${node.id}" data-type="${node.type}" style="padding-left: ${paddingLeft}px">
+          <i data-lucide="${iconName}" class="size-4 mr-2.5 shrink-0 transition-colors ${iconColorClass}"></i>
+          <span class="text-[13px] tracking-tight truncate ${textWeight} ${activeText}">${node.name}</span>
         </div>
       `;
 
@@ -124,29 +104,33 @@ export class FileExplorer extends Component {
     treeEl.onclick = (e) => {
       const node = e.target.closest(".tree-node");
       if (!node) return;
-
+      
       const id = node.dataset.id;
       const type = node.dataset.type;
 
       if (type === "file") {
         fsStore.peekFile(id);
       } else if (type === "folder") {
+        // Toggle local state
         if (this.collapsedFolders.has(id)) {
           this.collapsedFolders.delete(id);
         } else {
           this.collapsedFolders.add(id);
         }
-
+        
+        // Update ONLY the tree contents to preserve the wrapper and its events
         const { tree, activeFileId } = fsStore.getState();
         treeEl.innerHTML = this.renderTree(tree, activeFileId);
+        
+        // Re-initialize icons for the newly injected HTML
         renderIcons(treeEl);
       }
     };
 
     const newBtn = this.container.querySelector("#new-file-btn");
-    if (newBtn) newBtn.onclick = () => this.dialog.show("file");
+    if (newBtn) newBtn.onclick = () => this.dialog.show('file');
 
     const folderBtn = this.container.querySelector("#new-folder-btn");
-    if (folderBtn) folderBtn.onclick = () => this.dialog.show("folder");
+    if (folderBtn) folderBtn.onclick = () => this.dialog.show('folder');
   }
 }
